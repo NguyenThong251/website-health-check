@@ -15,7 +15,7 @@ export const config = { maxDuration: 30 };
 
 const ALLOWED_ORIGINS = [
   /^https:\/\/nguyenthong251\.github\.io$/,
-  /^https:\/\/website-health-check[a-z0-9-]*\.vercel\.app$/,
+  /^https:\/\/website-health-check-cyan\.vercel\.app$/,
   /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
 ];
 const MAX_BODY = 2000;

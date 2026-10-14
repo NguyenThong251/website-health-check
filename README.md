@@ -10,4 +10,4 @@ The API fetches URLs from anonymous visitors, so every request goes through an S
 
 ## Deploy
 - GitHub Pages: branch `main`, root.
-- Vercel: import this repo (framework preset "Other"); the function is picked up from `api/`. If the Vercel domain is not `website-health-check.vercel.app`, update `API` in `index.html`.
+- Vercel: import this repo (framework preset "Other"); the function is picked up from `api/`. Vercel domain: `website-health-check-cyan.vercel.app`. If it changes, update `API` in `index.html`.
