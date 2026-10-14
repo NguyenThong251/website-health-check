@@ -1,0 +1,10 @@
+{
+  "name": "website-health-check",
+  "private": true,
+  "description": "Free Website Health Check: static page (GitHub Pages) + checker API (Vercel function).",
+  "engines": { "node": ">=20" },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

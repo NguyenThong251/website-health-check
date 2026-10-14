@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Website Health Check</title>
+<meta name="description" content="Check if your website is online, if the SSL certificate is about to expire, and if your call, Zalo and email buttons actually work. Free, about 20 seconds.">
+<style>
+:root{--bg:#fafafa;--card:#fff;--ink:#111;--muted:#666;--line:#e5e5e5;--accent:#111;--bad:#c62828;--bad-bg:#fdecea;--warn:#a15c00;--warn-bg:#fff4e0;--ok:#2e7d32;--ok-bg:#e8f5e9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+header{padding:56px 0 32px}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(32px,6vw,52px);line-height:1.1;margin:8px 0 16px}
+.lead{font-size:18px;color:var(--muted);max-width:640px;margin:0 0 24px}
+form{display:flex;gap:10px;flex-wrap:wrap}
+input{flex:1 1 260px;min-width:0;font:inherit;padding:14px 18px;border:1px solid #ccc;border-radius:10px;background:#fff;color:var(--ink)}
+input:focus{outline:2px solid var(--ink);outline-offset:1px}
+button{font:inherit;font-weight:600;padding:14px 22px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+.note{font-size:14px;color:var(--muted);margin:12px 0 0}
+.err{margin:16px 0 0;padding:12px 16px;border-radius:10px;background:var(--bad-bg);color:var(--bad)}
+section{padding:8px 0 40px}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:0;margin:0;list-style:none}
+.checks li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-weight:500}
+h2{font-size:24px;margin:0 0 12px}
+.host{font-size:clamp(24px,5vw,36px);margin:0;overflow-wrap:anywhere}
+.summary{color:var(--muted);margin:4px 0 20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.stat .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.stat .v{font-size:20px;font-weight:700;overflow-wrap:anywhere}
+.bad{color:var(--bad)}.warn{color:var(--warn)}.good{color:var(--ok)}
+.group{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 14px}
+.group h3{margin:0 0 10px;font-size:18px}
+.group ul{margin:0;padding:0;list-style:none}
+.group li{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--line);overflow-wrap:anywhere;min-width:0}
+.group li:first-child{border-top:0}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:8px}
+.g-critical .dot{background:var(--bad)}.g-warning .dot{background:#f59e0b}.g-passed .dot{background:var(--ok)}
+.imgs li{justify-content:space-between}
+.imgs .u{color:var(--muted);font-size:14px;word-break:break-all;min-width:0}
+.imgs .k{flex:none;font-weight:600}
+.small{font-size:14px;color:var(--muted)}
+.cta{background:var(--ink);color:#fff;border-radius:12px;padding:20px 22px;margin:20px 0 0}
+.cta h3{margin:0 0 6px}
+.cta p{margin:0 0 14px;color:#ccc}
+.cta .row{display:flex;gap:10px;flex-wrap:wrap}
+.cta a{display:inline-block;padding:10px 16px;border-radius:10px;background:#fff;color:#111;text-decoration:none;font-weight:600}
+.cta a.ghost{background:transparent;color:#fff;border:1px solid #666}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+footer{padding:24px 0 40px;font-size:14px;color:var(--muted);border-top:1px solid var(--line)}
+@media (max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}header{padding-top:36px}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <div class="eyebrow">Free tool</div>
+  <h1>Website health check</h1>
+  <p class="lead">Is your site online? Is the SSL certificate about to expire? Do the call, Zalo and email buttons actually reach you? Find out in about 20 seconds.</p>
+  <form id="f" novalidate>
+    <label for="u" style="position:absolute;left:-9999px">Website address</label>
+    <input id="u" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="yourbusiness.com" maxlength="300">
+    <button id="b" type="submit">Check my website</button>
+  </form>
+  <p class="note">Privacy: the address you enter is only used to run this check. It isn’t saved or logged by this tool.</p>
+  <p class="err" id="err" role="alert" hidden></p>
+</header>
+
+<section class="wrap" id="out" aria-live="polite">
+  <h2>What gets checked</h2>
+  <ul class="checks">
+    <li>Online &amp; hosting page</li><li>SSL certificate</li><li>Call, Zalo &amp; email links</li><li>Injected spam links</li><li>Heavy images</li>
+  </ul>
+</section>
+
+<footer class="wrap">
+  Built by Nguyen Hoang Thong, full-stack developer in Ho Chi Minh City ·
+  <a href="https://hoangthong.io.vn">hoangthong.io.vn</a> ·
+  <a href="https://zalo.me/0383326547" rel="noopener">Zalo +84 383 326 547</a>
+</footer>
+
+<script>
+// The API runs on Vercel; this page is static (GitHub Pages). On Vercel itself or the local
+// dev server the API is same-origin.
+const API = /github\.io$/.test(location.hostname)
+  ? 'https://website-health-check.vercel.app/api/check'
+  : '/api/check';
+
+const $ = (id) => document.getElementById(id);
+const out = $('out');
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null) e.append(k);
+  return e;
+}
+
+function stat(label, value, tone) {
+  return el('div', { class: 'stat' }, el('div', { class: 'l' }, label), el('div', { class: 'v ' + (tone || '') }, value));
+}
+
+function group(title, kind, items) {
+  if (!items.length) return null;
+  return el('div', { class: 'group g-' + kind },
+    el('h3', {}, `${title} (${items.length})`),
+    el('ul', {}, ...items.map((i) => el('li', {}, el('span', { class: 'dot' }), el('span', {}, i.message)))));
+}
+
+function render(r) {
+  out.replaceChildren();
+  const total = r.issues.length + r.warnings.length;
+  const sslTone = !r.ssl.ok ? 'bad' : r.ssl.daysLeft !== null && r.ssl.daysLeft <= 14 ? 'warn' : 'good';
+  const sslText = r.ssl.daysLeft !== null ? (r.ssl.daysLeft < 0 ? 'Expired' : `${r.ssl.daysLeft} days left`) : r.ssl.ok ? 'Valid' : 'Error';
+  out.append(
+    el('div', { class: 'eyebrow' }, 'Results'),
+    el('p', { class: 'host' }, r.host),
+    el('p', { class: 'summary' },
+      total === 0 ? 'No problems found. Nice!' : `${r.issues.length} critical issue${r.issues.length === 1 ? '' : 's'}, ${r.warnings.length} warning${r.warnings.length === 1 ? '' : 's'}`,
+      el('br'),
+      `Checked ${new Date(r.checkedAt).toLocaleString('en-GB')}${r.partial ? ' · some checks were skipped (time limit)' : ''}`),
+    el('div', { class: 'stats' },
+      stat('Status', r.status ? `HTTP ${r.status}` : 'Offline', !r.status || r.status >= 400 ? 'bad' : 'good'),
+      stat('Response', r.responseMs !== null ? `${(r.responseMs / 1000).toFixed(1)} s` : '–', r.responseMs > 5000 ? 'warn' : ''),
+      stat('SSL', sslText, sslTone),
+      stat('Page HTML', r.stats.htmlKB !== null ? `${r.stats.htmlKB} KB` : '–', r.stats.htmlKB > 500 ? 'warn' : '')),
+    group('Critical', 'critical', r.issues) || '',
+    group('Warnings', 'warning', r.warnings) || '',
+  );
+  if (r.stats.heavyImages.length) {
+    out.append(el('div', { class: 'group imgs' }, el('h3', {}, 'Heaviest images'),
+      el('ul', {}, ...r.stats.heavyImages.map((i) => el('li', {}, el('span', { class: 'u' }, i.url), el('span', { class: 'k' }, `${i.kb.toLocaleString('en-US')} KB`))))));
+  }
+  const passed = group('Passed', 'passed', r.passed);
+  if (passed) out.append(passed);
+  const psi = el('a', { href: r.pageSpeedUrl, target: '_blank', rel: 'noopener' }, 'Google PageSpeed Insights');
+  out.append(
+    el('p', { class: 'small' }, r.disclaimer + ' ', 'Speed test: ', psi, '.'),
+    el('div', { class: 'cta' },
+      el('h3', {}, total ? 'Want these fixed?' : 'Want someone to keep an eye on it?'),
+      el('p', {}, 'I fix call/Zalo links, SSL, slow pages and broken forms, and offer monthly website care from 300,000 VND.'),
+      el('div', { class: 'row' },
+        el('a', { href: 'https://zalo.me/0383326547', target: '_blank', rel: 'noopener' }, 'Message on Zalo'),
+        el('a', { class: 'ghost', href: 'https://hoangthong.io.vn/website-care' }, 'Website care plans'))),
+  );
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+$('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const b = $('b'), err = $('err'), value = $('u').value.trim();
+  err.hidden = true;
+  if (!value) { err.textContent = 'Please enter your website address, for example yourbusiness.com'; err.hidden = false; return; }
+  b.disabled = true;
+  b.replaceChildren(el('span', { class: 'spin' }), 'Checking…');
+  out.replaceChildren(el('p', {}, 'Loading the home page, testing the SSL certificate, contact links and images. This usually takes 5–20 seconds.'));
+  try {
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: value }) });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.error) throw new Error(data?.error || 'Something went wrong. Please try again.');
+    render(data);
+  } catch (x) {
+    out.replaceChildren();
+    err.textContent = x instanceof TypeError ? 'Couldn’t reach the checker. Please check your connection and try again.' : x.message;
+    err.hidden = false;
+  } finally {
+    b.disabled = false;
+    b.textContent = 'Check my website';
+  }
+});
+</script>
+</body>
+</html>
